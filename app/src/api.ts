@@ -38,6 +38,39 @@ export async function api<T>(path: string, options: Options = {}): Promise<T> {
   return data as T;
 }
 
+// Upload a receipt photo for a loan (sent as multipart/form-data, not JSON)
+export async function uploadReceipt(
+  loanId: string,
+  image: { uri: string; mimeType?: string | null; fileName?: string | null }
+): Promise<void> {
+  const form = new FormData();
+  form.append("receipt", {
+    uri: image.uri,
+    name: image.fileName ?? "receipt.jpg",
+    type: image.mimeType ?? "image/jpeg",
+  } as unknown as Blob);
+
+  const headers: Record<string, string> = {};
+  if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
+
+  const res = await fetch(`${API_URL}/loans/${loanId}/receipt`, {
+    method: "POST",
+    headers,
+    body: form,
+  });
+
+  const data = await res.json().catch(() => ({}));
+  if (res.status === 401 && authToken) onUnauthorized?.();
+  if (!res.ok) {
+    throw new Error(data.error ?? `Upload failed (${res.status})`);
+  }
+}
+
+// "/uploads/abc.jpg" -> "http://192.168.1.13:3000/uploads/abc.jpg"
+export function receiptImageUrl(path: string): string {
+  return `${API_URL}${path}`;
+}
+
 // Turns any error into a message we can show the user
 export function errorMessage(e: unknown): string {
   if (e instanceof TypeError) return "Can't reach the server. Check your connection.";
