@@ -2,6 +2,7 @@ import Fastify from "fastify";
 import cors from "@fastify/cors";
 import jwt from "@fastify/jwt";
 import { authRoutes } from "./routes/auth";
+import { loanRoutes } from "./routes/loans";
 
 process.loadEnvFile(); // reads .env into process.env
 
@@ -15,5 +16,6 @@ await app.register(jwt, { secret });
 
 app.get("/health", async () => ({ ok: true }));
 await app.register(authRoutes);
+await app.register(loanRoutes);
 
 app.listen({ port: 3000, host: "0.0.0.0" });
