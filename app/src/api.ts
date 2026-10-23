@@ -38,8 +38,10 @@ export async function api<T>(path: string, options: Options = {}): Promise<T> {
   return data as T;
 }
 
-// Upload a receipt photo for a loan (sent as multipart/form-data, not JSON)
-export async function uploadReceipt(
+// Upload a receipt photo for a loan.
+// Uses XMLHttpRequest because Expo's fetch doesn't support
+// React Native-style file parts ({ uri, name, type }) in FormData.
+export function uploadReceipt(
   loanId: string,
   image: { uri: string; mimeType?: string | null; fileName?: string | null }
 ): Promise<void> {
@@ -50,20 +52,31 @@ export async function uploadReceipt(
     type: image.mimeType ?? "image/jpeg",
   } as unknown as Blob);
 
-  const headers: Record<string, string> = {};
-  if (authToken) headers["Authorization"] = `Bearer ${authToken}`;
+  return new Promise((resolve, reject) => {
+    const xhr = new XMLHttpRequest();
+    xhr.open("POST", `${API_URL}/loans/${loanId}/receipt`);
+    if (authToken) xhr.setRequestHeader("Authorization", `Bearer ${authToken}`);
 
-  const res = await fetch(`${API_URL}/loans/${loanId}/receipt`, {
-    method: "POST",
-    headers,
-    body: form,
+    xhr.onload = () => {
+      let data: { error?: string } = {};
+      try {
+        data = JSON.parse(xhr.responseText);
+      } catch {}
+
+      if (xhr.status === 401 && authToken) onUnauthorized?.();
+
+      if (xhr.status >= 200 && xhr.status < 300) {
+        resolve();
+      } else {
+        reject(new Error(data.error ?? `Upload failed (${xhr.status})`));
+      }
+    };
+
+    // Phone couldn't reach the server at all
+    xhr.onerror = () => reject(new TypeError("Network request failed"));
+
+    xhr.send(form);
   });
-
-  const data = await res.json().catch(() => ({}));
-  if (res.status === 401 && authToken) onUnauthorized?.();
-  if (!res.ok) {
-    throw new Error(data.error ?? `Upload failed (${res.status})`);
-  }
 }
 
 // "/uploads/abc.jpg" -> "http://192.168.1.13:3000/uploads/abc.jpg"
