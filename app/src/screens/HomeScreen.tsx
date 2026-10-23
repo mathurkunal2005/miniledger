@@ -14,6 +14,7 @@ import type { Loan, Summary } from "../types";
 import { formatRupees } from "../format";
 import SummaryCard from "../components/SummaryCard";
 import LoanItem from "../components/LoanItem";
+import AddLoanModal from "../components/AddLoanModal";
 
 type Props = { onLogout: () => void };
 
@@ -23,8 +24,8 @@ export default function HomeScreen({ onLogout }: Props) {
   const [loading, setLoading] = useState(true);
   const [refreshing, setRefreshing] = useState(false);
   const [error, setError] = useState<string | null>(null);
+  const [showAdd, setShowAdd] = useState(false);
 
-  // Fetch loans and summary at the same time
   const load = useCallback(async () => {
     try {
       setError(null);
@@ -39,7 +40,6 @@ export default function HomeScreen({ onLogout }: Props) {
     }
   }, []);
 
-  // Run once when the screen opens
   useEffect(() => {
     load().finally(() => setLoading(false));
   }, [load]);
@@ -106,10 +106,16 @@ export default function HomeScreen({ onLogout }: Props) {
             </>
           }
           ListEmptyComponent={
-            <Text style={styles.empty}>No loans yet. Add one to get started.</Text>
+            <Text style={styles.empty}>No loans yet. Tap "+ Add loan" to get started.</Text>
           }
         />
       )}
+
+      <Pressable style={styles.fab} onPress={() => setShowAdd(true)}>
+        <Text style={styles.fabText}>+ Add loan</Text>
+      </Pressable>
+
+      <AddLoanModal visible={showAdd} onClose={() => setShowAdd(false)} onAdded={load} />
     </View>
   );
 }
@@ -130,8 +136,23 @@ const styles = StyleSheet.create({
   errorText: { color: "#DC2626", textAlign: "center", fontSize: 15 },
   retry: { marginTop: 16, backgroundColor: "#2563EB", paddingHorizontal: 20, paddingVertical: 12, borderRadius: 10 },
   retryText: { color: "#fff", fontWeight: "600" },
-  list: { paddingHorizontal: 20, paddingBottom: 40 },
+  list: { paddingHorizontal: 20, paddingBottom: 100 },
   banner: { backgroundColor: "#FEF2F2", color: "#DC2626", padding: 10, borderRadius: 8, marginBottom: 12 },
   section: { fontSize: 16, fontWeight: "600", color: "#334155", marginBottom: 10 },
   empty: { textAlign: "center", color: "#94A3B8", marginTop: 30 },
+  fab: {
+    position: "absolute",
+    right: 20,
+    bottom: 36,
+    backgroundColor: "#2563EB",
+    paddingHorizontal: 20,
+    paddingVertical: 14,
+    borderRadius: 30,
+    elevation: 4,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 6,
+    shadowOffset: { width: 0, height: 3 },
+  },
+  fabText: { color: "#fff", fontSize: 15, fontWeight: "700" },
 });
