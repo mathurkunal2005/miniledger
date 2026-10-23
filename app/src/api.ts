@@ -1,9 +1,15 @@
 import { API_URL } from "./config";
 
 let authToken: string | null = null;
+let onUnauthorized: (() => void) | null = null;
 
 export function setToken(token: string | null) {
   authToken = token;
+}
+
+// App.tsx registers a function here so we can log out when the token is rejected
+export function setOnUnauthorized(handler: (() => void) | null) {
+  onUnauthorized = handler;
 }
 
 type Options = { method?: string; body?: unknown };
@@ -20,6 +26,12 @@ export async function api<T>(path: string, options: Options = {}): Promise<T> {
   });
 
   const data = await res.json().catch(() => ({}));
+
+  // Logged in, but the server rejected our token (expired or invalid) -> log out
+  if (res.status === 401 && authToken) {
+    onUnauthorized?.();
+  }
+
   if (!res.ok) {
     throw new Error(data.error ?? `Request failed (${res.status})`);
   }
