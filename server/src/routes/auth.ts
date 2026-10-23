@@ -1,6 +1,7 @@
 import type { FastifyInstance } from "fastify";
 import { z } from "zod";
 import { prisma } from "../db";
+import { ConsoleSmsSender, type SmsSender } from "../sms";
 
 // Indian mobile: 10 digits, starting with 6-9
 export const phoneSchema = z
@@ -10,7 +11,10 @@ export const phoneSchema = z
 const OTP_EXPIRY_MS = 5 * 60 * 1000; // 5 minutes
 
 export async function authRoutes(app: FastifyInstance) {
-  // Step 1 of login: generate an OTP and "send" it (print to server log)
+  // Swap this for a real provider (e.g. MSG91, Twilio) to send real SMS
+  const sms: SmsSender = new ConsoleSmsSender(app.log);
+
+  // Step 1 of login: generate an OTP and send it
   app.post("/auth/send-otp", async (request, reply) => {
     const parsed = z.object({ phone: phoneSchema }).safeParse(request.body);
     if (!parsed.success) {
@@ -24,7 +28,7 @@ export async function authRoutes(app: FastifyInstance) {
       data: { phone, code, expiresAt: new Date(Date.now() + OTP_EXPIRY_MS) },
     });
 
-    app.log.info(`OTP for ${phone}: ${code}`);
+    await sms.sendOtp(phone, code);
     return { message: "OTP sent" };
   });
 
