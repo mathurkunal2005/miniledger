@@ -81,6 +81,7 @@ export default function AddLoanModal({ visible, onClose, onAdded }: Props) {
     if (!friendName.trim()) return "Enter your friend's name";
     if (!/^\d+(\.\d{1,2})?$/.test(amount)) return "Enter a valid amount, like 500 or 250.50";
     if (Number(amount) <= 0) return "Amount must be more than 0";
+        if (Number(amount) > 10_000_000) return "Amount can't be more than ₹1 crore";
     if (!/^\d{4}-\d{2}-\d{2}$/.test(dueDate) || isNaN(new Date(dueDate).getTime())) {
       return "Enter the date as YYYY-MM-DD";
     }

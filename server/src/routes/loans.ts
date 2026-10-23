@@ -8,7 +8,8 @@ export const createLoanSchema = z.object({
   amountPaise: z
     .number()
     .int("Amount must be in whole paise")
-    .positive("Amount must be more than 0"),
+    .positive("Amount must be more than 0")
+    .max(1_000_000_000, "Amount can't be more than ₹1 crore"),
   dueDate: z.coerce.date(),
 });
 
