@@ -3,7 +3,7 @@ import { z } from "zod";
 import { prisma } from "../db";
 
 // Indian mobile: 10 digits, starting with 6-9
-const phoneSchema = z
+export const phoneSchema = z
   .string()
   .regex(/^[6-9]\d{9}$/, "Enter a valid 10-digit mobile number");
 

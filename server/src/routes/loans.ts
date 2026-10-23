@@ -3,7 +3,7 @@ import type { Loan } from "@prisma/client";
 import { z } from "zod";
 import { prisma } from "../db";
 
-const createLoanSchema = z.object({
+export const createLoanSchema = z.object({
   friendName: z.string().trim().min(1, "Friend name is required").max(100),
   amountPaise: z
     .number()
