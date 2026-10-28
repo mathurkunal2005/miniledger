@@ -2,7 +2,7 @@
 
 A small app to track money lent to friends: log in with your phone number, record loans, mark them repaid, and see what's overdue at a glance.
 
-Built as the take-home assignment for the Credsetu Full Stack Development internship.
+Built as a full-stack take-home exercise.
 
 ## Features
 
@@ -140,6 +140,6 @@ All routes except `/health` and `/auth/*` need an `Authorization: Bearer <token>
 
 ## Known limitations / next steps
 
-- OTP is mocked as requested; production would use an SMS provider (e.g. MSG91) via `SmsSender`, plus rate limiting on OTP requests
+- OTP is mocked for local development; production would use an SMS provider (e.g. MSG91) via `SmsSender`, plus rate limiting on OTP requests
 - Receipts are stored on local disk; production would use private S3 storage with signed URLs
 - No deployment config yet (Docker, CI)

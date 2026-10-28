@@ -5,7 +5,7 @@ export interface SmsSender {
   sendOtp(phone: string, code: string): Promise<void>;
 }
 
-// Mock sender: prints the OTP to the server log (as the assignment asks)
+// Mock sender: prints the OTP to the server log (mock for local dev)
 export class ConsoleSmsSender implements SmsSender {
   constructor(private log: FastifyBaseLogger) {}
 
